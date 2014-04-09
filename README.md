@@ -1,2 +1,3 @@
-eztv_api
+EZTV API
 ========
+Web scraper for EZTV.it
