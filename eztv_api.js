@@ -29,8 +29,16 @@ exports.getLatestShows	=	function() {
             $('tr.forum_header_border[name="hover"]').filter(function(){
                 var entry = $(this);
 
-                var show = entry.children('td').first().children('a').first().children('img').first().attr('title').replace('Show Description about ', '');
+                var show = entry.children('td').first()
+				.children('a').first()
+				.children('img').first()
+				.attr('title').replace('Show Description about ', '');
 
+		var tvrage_id = entry.children('td').first()
+				.children('a').last()
+				.attr('href').replace(/http:\/\/www.tvrage.com\/(.*)\/episodes\//, '');
+
+		console.log('TVRage ID: ' + tvrage_id);
                 console.log('Show: '+ show);
             });
         }
