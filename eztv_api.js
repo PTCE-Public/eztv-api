@@ -15,25 +15,27 @@ var LATEST	=	"/sort/100/";
 var SEARCH	=	"/search/";
 
 exports.getAllShows	=	function(cb) {
-    request(BASE_URL + SHOWLIST, function(err, res, html){
+	if(cb == null) return;
+    	request(BASE_URL + SHOWLIST, function(err, res, html){
 
-	if(err) return (err, null);
+		if(err) return (err, null);
 
-	var $ = cheerio.load(html);
-	var title, show;
-	var allShows = [];
+		var $ = cheerio.load(html);
+		var title, show;
+		var allShows = [];
 
-	$('.thread_link').each(function(){
-		var entry = $(this);
-		var show = entry.text();
-		allShows.push(show);
-	});
+		$('.thread_link').each(function(){
+			var entry = $(this);
+			var show = entry.text();
+			allShows.push(show);
+		});
 
-	return cb(null, allShows);
-    });
+		return cb(null, allShows);
+    	});
 }
 
 exports.getEpisodeMagnet	=	function(data, cb) {
+	if(cb == null) return;
 	var show = data.show;
 	var season = data.season;
 	var episode = data.episode;
