@@ -9,6 +9,7 @@
   },
   "dependencies" : {
     "request"    : "latest",
-    "cheerio"    : "latest"
+    "cheerio"    : "latest",
+    "URIjs": "1.12.1"
   }
 }
