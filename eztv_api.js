@@ -94,8 +94,8 @@ exports.getAllEpisodes = function(data, cb) {
             var matcher = title.match(/S([0-9]+)E([0-9]+)/);
             if(!matcher) matcher = title.match(/([0-9]+)x([0-9]+)/);
             if(matcher) {
-                var season = matcher[1];
-                var episode = matcher[2];
+                var season = parseInt(matcher[1], 10);
+                var episode = parseInt(matcher[2], 10);
                 var episodeStruct = {};
                 episodeStruct.url = magnet;
                 episodeStruct.seeds = 0;
