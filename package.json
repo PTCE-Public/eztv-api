@@ -2,7 +2,7 @@
   "name"         : "eztv_api_x",
   "version"      : "0.0.1",
   "description"  : "Web Scraper to provide methods to access EZTV easier",
-  "author"       : "SlashmanX",
+  "author"       : "SlashmanX & phenomenz",
   "repository"   : { 
     "type"       : "git", 
     "url"        : "http://github.com/SlashmanX/eztv_api.git"
