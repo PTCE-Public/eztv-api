@@ -82,7 +82,12 @@ exports.getAllEpisodes = function(data, cb) {
         var $ = cheerio.load(html);
 
         var show_rows = $('tr.forum_header_border[name="hover"]').filter(function() {
-            return $(this).children('.forum_thread_post').length > 0;
+            episode_rows = $(this).children('.forum_thread_post');
+	    if(episode_rows.length > 0) {
+		var title = entry.children('td').eq(1).text();
+		if(title.indexOf("x264") > -1) return true;
+	    }
+	    return false;
         });
 
         if(show_rows.length === 0) return cb("Show Not Found", null);
