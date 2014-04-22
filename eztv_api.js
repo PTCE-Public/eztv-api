@@ -13,6 +13,7 @@ var BASE_URL	=	"http://eztv.it";
 var SHOWLIST	=	"/showlist/";
 var LATEST	=	"/sort/100/";
 var SEARCH	=	"/search/";
+var SHOWS   =   "/shows/";
 
 exports.getAllShows	=	function(cb) {
 	if(cb == null) return;
@@ -70,3 +71,35 @@ exports.getEpisodeMagnet	=	function(data, cb) {
 		return cb(null, magnet_link);
 	});
 };
+
+exports.getAllEpisodes = function(data, cb) {
+    if(cb == null) return;
+    var episodes = {};
+
+    request.get(BASE_URL + SHOWS + data.id + "/"+ data.slug +"/", function (err, res, html) {
+        if(err) return cb(err, null);
+
+        var $ = cheerio.load(html);
+
+        var show_rows = $('tr.forum_header_border[name="hover"]').filter(function() {
+            return $(this).children('.forum_thread_post').length > 0;
+        });
+
+        if(show_rows.length === 0) return cb("Show Not Found", null);
+
+        show_rows.each(function() {
+            var entry = $(this);
+            var title = entry.children('td').eq(1).text();
+            var magnet = entry.children('td').eq(2).children('a').first().attr('href');
+            var matcher = title.match(/S([0-9]+)E([0-9]+)/);
+            if(!matcher) matcher = title.match(/([0-9]+)x([0-9]+)/);
+            if(matcher) {
+                var season = matcher[1];
+                var episode = matcher[2];
+                if(!episodes[season]) episodes[season] = {};
+                episodes[season][episode] = magnet;
+            }
+        });
+        return cb(null, episodes);
+    });
+}
