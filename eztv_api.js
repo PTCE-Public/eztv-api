@@ -27,7 +27,9 @@ exports.getAllShows	=	function(cb) {
 		$('.thread_link').each(function(){
 			var entry = $(this);
 			var show = entry.text();
-			allShows.push(show);
+            var id = entry.attr('href').match(/\/shows\/(.*)\/(.*)\//)[1];
+            var slug = entry.attr('href').match(/\/shows\/(.*)\/(.*)\//)[2];
+			allShows.push({show: show, id: id, slug: slug});
 		});
 
 		return cb(null, allShows);
@@ -67,11 +69,4 @@ exports.getEpisodeMagnet	=	function(data, cb) {
 		var magnet_link = episode_row.children('td[align="center"]').children('a').first().attr('href');
 		return cb(null, magnet_link);
 	});
-};
-
-/*************************
-**	Objects		**
-**************************/
-
-function Listing() {
 };
