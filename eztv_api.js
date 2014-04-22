@@ -96,8 +96,12 @@ exports.getAllEpisodes = function(data, cb) {
             if(matcher) {
                 var season = matcher[1];
                 var episode = matcher[2];
+                var episodeStruct = {};
+                episodeStruct.url = magnet;
+                episodeStruct.seeds = 0;
+                episodeStruct.peers = 0;
                 if(!episodes[season]) episodes[season] = {};
-                episodes[season][episode] = magnet;
+                episodes[season][episode] = episodeStruct;
             }
         });
         return cb(null, episodes);
