@@ -101,12 +101,12 @@ exports.getAllEpisodes = function(data, cb) {
             if(matcher) {
                 var season = parseInt(matcher[1], 10);
                 var episode = parseInt(matcher[2], 10);
-                var episodeStruct = {};
-                episodeStruct.url = magnet;
-                episodeStruct.seeds = 0;
-                episodeStruct.peers = 0;
+                var torrent = {};
+                torrent.url = magnet;
+                torrent.seeds = 0;
+                torrent.peers = 0;
                 if(!episodes[season]) episodes[season] = {};
-                episodes[season][episode] = episodeStruct;
+                episodes[season][episode] = torrent;
             }
         });
         return cb(null, episodes);
