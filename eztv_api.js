@@ -82,7 +82,12 @@ exports.getAllEpisodes = function(data, cb) {
         var $ = cheerio.load(html);
 
         var show_rows = $('tr.forum_header_border[name="hover"]').filter(function() {
-            return $(this).children('.forum_thread_post').length > 0;
+            episode_rows = $(this).children('.forum_thread_post');
+	    if(episode_rows.length > 0) {
+		var title = $(this).children('td').eq(1).text();
+		if(title.indexOf("x264") > -1) return true;
+	    }
+	    return false;
         });
 
         if(show_rows.length === 0) return cb("Show Not Found", null);
@@ -94,14 +99,14 @@ exports.getAllEpisodes = function(data, cb) {
             var matcher = title.match(/S([0-9]+)E([0-9]+)/);
             if(!matcher) matcher = title.match(/([0-9]+)x([0-9]+)/);
             if(matcher) {
-                var season = matcher[1];
-                var episode = matcher[2];
-                var episodeStruct = {};
-                episodeStruct.url = magnet;
-                episodeStruct.seeds = 0;
-                episodeStruct.peers = 0;
+                var season = parseInt(matcher[1], 10);
+                var episode = parseInt(matcher[2], 10);
+                var torrent = {};
+                torrent.url = magnet;
+                torrent.seeds = 0;
+                torrent.peers = 0;
                 if(!episodes[season]) episodes[season] = {};
-                episodes[season][episode] = episodeStruct;
+                episodes[season][episode] = torrent;
             }
         });
         return cb(null, episodes);
