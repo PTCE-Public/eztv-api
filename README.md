@@ -2,7 +2,7 @@ EZTV API
 ========
 Web scraper for EZTV.it
 
-Currently supports 2 methods
+Currently supports 3 methods
 
 `getAllShows(cb)` Returns an object array of all TV Shows on eztv.it/showlist/ in the form `{show: showname, id: eztvId, slug: eztv-slug}`
 
