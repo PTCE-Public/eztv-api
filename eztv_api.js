@@ -106,9 +106,9 @@ exports.getAllEpisodes = function(data, cb) {
                 torrent.url = magnet;
                 torrent.seeds = 0;
                 torrent.peers = 0;
-                torrent.dateBased = false;
                 if(!episodes[season]) episodes[season] = {};
                 episodes[season][episode] = torrent;
+                episodes.dateBased = false;
             }
             else {
             	matcher = title.match(/(\d{4}) (\d{2} \d{2})/); // Date based TV Shows
@@ -119,9 +119,9 @@ exports.getAllEpisodes = function(data, cb) {
 	                torrent.url = magnet;
 	                torrent.seeds = 0;
 	                torrent.peers = 0;
-	                torrent.dateBased = true;
 	                if(!episodes[season]) episodes[season] = {};
 	                episodes[season][episode] = torrent;
+	                episodes.dateBased = true;
 	            }
             }
         });
