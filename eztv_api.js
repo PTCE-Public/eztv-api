@@ -4,6 +4,7 @@
 
 var request	=	require('request');
 var cheerio	=	require('cheerio');
+var moment	=	require('moment');
 
 /*************************
 **	Variables	**
@@ -107,6 +108,19 @@ exports.getAllEpisodes = function(data, cb) {
                 torrent.peers = 0;
                 if(!episodes[season]) episodes[season] = {};
                 episodes[season][episode] = torrent;
+            }
+            else {
+            	matcher = title.match(/(\d{4}) (\d{2} \d{2})/); // Date based TV Shows
+            	if(matcher) {
+	                var season = matcher[1]; // Season : 2014
+	                var episode = matcher[2].replace(" ", "/"); //Episode : 04/06
+	                var torrent = {};
+	                torrent.url = magnet;
+	                torrent.seeds = 0;
+	                torrent.peers = 0;
+	                if(!episodes[season]) episodes[season] = {};
+	                episodes[season][episode] = torrent;
+	            }
             }
         });
         return cb(null, episodes);
