@@ -84,11 +84,18 @@ exports.getAllEpisodes = function(data, cb) {
 
         var show_rows = $('tr.forum_header_border[name="hover"]').filter(function() {
             episode_rows = $(this).children('.forum_thread_post');
-	    if(episode_rows.length > 0) {
-		var title = $(this).children('td').eq(1).text();
-		if(title.indexOf("x264") > -1) return true;
-	    }
-	    return false;
+		    if(episode_rows.length > 0) {
+				var title = $(this).children('td').eq(1).text();
+
+				// we exclude all x264-CTU or AC3 (probably AC3)
+				if(title.indexOf("x264-CTU") > -1 || title.indexOf("AC3") > -1) 
+					return false;
+				else if(title.indexOf("XviD") > -1 || title.indexOf("x264") > -1) 
+					// accept xvid & x264
+					return true;
+				
+		    }
+		    return false;
         });
 
         if(show_rows.length === 0) return cb("Show Not Found", null);
