@@ -104,7 +104,7 @@ exports.getAllEpisodes = function(data, cb) {
 
         show_rows.each(function() {
             var entry = $(this);
-            var title = entry.children('td').eq(1).text();
+            var title = entry.children('td').eq(1).text().replace('x264', ''); // temp fix
             var magnet = entry.children('td').eq(2).children('a').first().attr('href');
             var matcher = title.match(/S?0*(\d+)?[xE]0*(\d+)/);
             if(matcher) {

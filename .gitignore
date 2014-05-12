@@ -26,3 +26,5 @@ node_modules
 
 # WebStorm stuff
 .idea/
+
+.package.json
