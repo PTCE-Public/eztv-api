@@ -88,9 +88,9 @@ exports.getAllEpisodes = function(data, cb) {
 				var title = $(this).children('td').eq(1).text();
 
 				// we exclude all x264-CTU or AC3 (probably AC3)
-				// CTU, CRX = team(s) of newb who release in AC3
+				// CTU, CRX, IMMERSE = team(s) who release in AC3
 				
-				if(title.indexOf("-CTU") > -1 || title.indexOf("-AC3") > -1|| title.indexOf("-CRX") > -1) 
+				if(title.indexOf("-CTU") > -1 || title.indexOf("-AC3") > -1 || title.indexOf("-CRX") > -1 || title.indexOf("-IMMERSE") > -1) 
 					return false;
 				else if(title.indexOf("XviD") > -1 || title.indexOf("x264") > -1 || title.indexOf("HDTV") > -1) 
 					// accept xvid & x264
