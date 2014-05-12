@@ -1,6 +1,6 @@
 {
   "name"         : "eztv_api_x",
-  "version"      : "0.1.0",
+  "version"      : "0.1.1",
   "description"  : "Web Scraper to provide methods to access EZTV easier",
   "author"       : "SlashmanX & phenomenz",
   "main"         : "./eztv_api",

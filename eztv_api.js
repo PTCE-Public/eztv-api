@@ -88,11 +88,11 @@ exports.getAllEpisodes = function(data, cb) {
 				var title = $(this).children('td').eq(1).text();
 
 				// we exclude all x264-CTU or AC3 (probably AC3)
-				// CTU, CRX = team(s) of new who release in AC3
+				// CTU, CRX = team(s) of newb who release in AC3
 				
 				if(title.indexOf("-CTU") > -1 || title.indexOf("-AC3") > -1|| title.indexOf("-CRX") > -1) 
 					return false;
-				else if(title.indexOf("XviD") > -1 || title.indexOf("x264") > -1) 
+				else if(title.indexOf("XviD") > -1 || title.indexOf("x264") > -1 || title.indexOf("HDTV") > -1) 
 					// accept xvid & x264
 					return true;
 				
@@ -106,8 +106,7 @@ exports.getAllEpisodes = function(data, cb) {
             var entry = $(this);
             var title = entry.children('td').eq(1).text();
             var magnet = entry.children('td').eq(2).children('a').first().attr('href');
-            var matcher = title.match(/S([0-9]+)E([0-9]+)/);
-            if(!matcher) matcher = title.match(/([0-9]+)x([0-9]+)/);
+            var matcher = title.match(/S?0*(\d+)?[xE]0*(\d+)/);
             if(matcher) {
                 var season = parseInt(matcher[1], 10);
                 var episode = parseInt(matcher[2], 10);
