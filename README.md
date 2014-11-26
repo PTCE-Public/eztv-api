@@ -6,7 +6,7 @@ Currently supports 3 methods
 
 `getShowList()` Returns an object array of all TV Shows on eztv.it/showlist/ in the form `{show: showname, id: eztvId, slug: eztv-slug}`
 
-`getEpisodes(data)` Data is JSON object same as one returned in `getAllShows` returns multi-dimensional array with magnet URL string in the form `episodes[season][episode]`
+`getEpisodes(data)` Data is JSON object same as one returned in `getShowList` returns multi-dimensional array with magnet URL string in the form `episodes[season][episode]`
 
 `latest()` Returns an object array of all TV Shows on eztv.it/sort/100 in the form 
 ```
