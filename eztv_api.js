@@ -2,113 +2,172 @@
 **  Modules     **
 **************************/
 
-var request =   require('request');
-var cheerio =   require('cheerio');
-var moment  =   require('moment');
+var request		=   require('superagent');
+var cheerio		=   require('cheerio');
+var moment      =   require('moment');
+var Q			=	require('q');
 
 /*************************
 **  Variables   **
 **************************/
 
-var BASE_URL    =   "http://eztv.it";
-var SHOWLIST    =   "/showlist/";
-var LATEST  =   "/sort/100/";
-var SEARCH  =   "/search/";
-var SHOWS   =   "/shows/";
+var BASE_URL	=	"https://eztv.it";
+var SHOWLIST	=	"/showlist/";
+var LATEST		=   "/sort/100/";
+var SEARCH		=	"/search/";
+var SHOWS		= 	"/shows/";
 
-var eztv_map = [];
-eztv_map['louie'] = 'louie-2010';
-eztv_map['battlestar-galactica'] = 'battlestar-galactica-2003';
-eztv_map['the-killing'] = 'the-killing-us';
-eztv_map['hawaii-five-0-2010'] = 'hawaii-fiveo-2010';
-eztv_map['the-goldbergs'] = 'the-goldbergs-2013';
-eztv_map['vikings-us'] = 'vikings';
+var mappings = require('./mappings');
 
-exports.getAllShows =   function(cb) {
-    if(cb == null) return;
-        request(BASE_URL + SHOWLIST, function(err, res, html){
+var EZTV = function(){};
 
-        if(err) return (err, null);
+EZTV.prototype.showMap = mappings;
 
-        var $ = cheerio.load(html);
-        var title, show;
-        var allShows = [];
+EZTV.prototype.getShowList =   function() {
+	var defer = Q.defer();
+	request(BASE_URL + SHOWLIST, function(res){
 
-        $('.thread_link').each(function(){
-            var entry = $(this);
-            var show = entry.text();
-            var id = entry.attr('href').match(/\/shows\/(.*)\/(.*)\//)[1];
-            var slug = entry.attr('href').match(/\/shows\/(.*)\/(.*)\//)[2];
-            slug = slug in eztv_map ? eztv_map[slug]: slug;
-            allShows.push({show: show, id: id, slug: slug});
-        });
+		if(!res.ok) {
+			return defer.reject(res.text);
+		}
 
-        return cb(null, allShows);
-        });
+
+		var $ = cheerio.load(res.text);
+		var title, show;
+		var allShows = [];
+
+		$('.thread_link').each(function(){
+			var entry = $(this);
+			var show = entry.text();
+			if(show) {
+				var id = entry.attr('href').match(/\/shows\/(.*)\/(.*)\//)[1];
+				var slug = entry.attr('href').match(/\/shows\/(.*)\/(.*)\//)[2];
+				slug = slug in mappings ? mappings[slug]: slug;
+				allShows.push({show: show, id: id, slug: slug});
+			}
+		});
+
+		return defer.resolve(allShows);
+	});
+
+	return defer.promise;
 }
 
-exports.getAllEpisodes = function(data, cb) {
-    if(cb == null) return;
-    var episodes = {};
+EZTV.prototype.getEpisodes = function(data, cb) {
+	var defer = Q.defer();
+	var episodes = {};
 
-    request.get(BASE_URL + SHOWS + data.id + "/"+ data.slug +"/", function (err, res, html) {
-        if(err) return cb(err, null);
+	request(BASE_URL + SHOWS + data.id + '/'+ data.slug +'/', function (res) {
+		if(!res.ok) return defer.reject(res.text);
 
-        var $ = cheerio.load(html);
+		var $ = cheerio.load(res.text);
 
-        var show_rows = $('tr.forum_header_border[name="hover"]').filter(function() {
-            episode_rows = $(this).children('.forum_thread_post');
-            if(episode_rows.length > 0) {
-                var title = $(this).children('td').eq(1).text();
+		var show_rows = $('tr.forum_header_border[name="hover"]').filter(function() {
+			episode_rows = $(this).children('.forum_thread_post');
+			if(episode_rows.length > 0) {
+				return true;
+			}
+			return false;
+		});
 
-                if(title.indexOf("-CTU") > -1)
-                    return false;
-                else
-                    return true;
-                
-            }
-            return false;
-        });
+		if(show_rows.length === 0) return defer.reject('Show Not Found: '+ data.slug);
 
-        if(show_rows.length === 0) return cb("Show Not Found", null);
+		show_rows.each(function() {
+			var entry = $(this);
+			
+			var info = parseRow(entry);
 
-        show_rows.each(function() {
-            var entry = $(this);
-            var title = entry.children('td').eq(1).text().replace('x264', ''); // temp fix
-            var magnet = entry.children('td').eq(2).children('a').first().attr('href');
-            var matcher = title.match(/S?0*(\d+)?[xE]0*(\d+)/);
-            var quality = title.match(/(\d{3,4})p/) ? title.match(/(\d{3,4})p/)[0] : "420p";
-            if(matcher) {
-                var season = parseInt(matcher[1], 10);
-                var episode = parseInt(matcher[2], 10);
-                var torrent = {};
-                torrent.url = magnet;
-                torrent.seeds = 0;
-                torrent.peers = 0;
-                if(!episodes[season]) episodes[season] = {};
-                if(!episodes[season][episode]) episodes[season][episode] = {};
-                if(!episodes[season][episode][quality] || title.toLowerCase().indexOf("repack") > -1)
-                	episodes[season][episode][quality] = torrent;
-                episodes.dateBased = false;
-            }
-            else {
-                matcher = title.match(/(\d{4}) (\d{2} \d{2})/); // Date based TV Shows
-                var quality = title.match(/(\d{3,4})p/) ? title.match(/(\d{3,4})p/)[0] : "420p";
-                if(matcher) {
-                    var season = matcher[1]; // Season : 2014
-                    var episode = matcher[2].replace(" ", "/"); //Episode : 04/06
-                    var torrent = {};
-                    torrent.url = magnet;
-                    torrent.seeds = 0;
-                    torrent.peers = 0;
-                    if(!episodes[season]) episodes[season] = {};
-	                if(!episodes[season][episode]) episodes[season][episode] = {};
-	                if(!episodes[season][episode][quality] || title.toLowerCase().indexOf("repack") > -1)
-	                	episodes[season][episode][quality] = torrent;
-                    episodes.dateBased = true;
-                }
-            }
-        });
-        return cb(null, episodes);
-    });
+			if(!episodes[info.season]) episodes[info.season] = {};
+			if(!episodes[info.season][info.episode]) episodes[info.season][info.episode] = {};
+			if(!episodes[info.season][info.episode][info.quality] || info.repack)
+				episodes[info.season][info.episode][info.quality] = info.torrent;
+			episodes.dateBased = info.dateBased;
+			});
+		defer.resolve(episodes);
+	});
+	return defer.promise;
 }
+
+EZTV.prototype.latest = function() {
+	var defer = Q.defer();
+	var episodes = [];
+	request(BASE_URL + LATEST, function(res) {
+		if(!res.ok) {
+			return defer.reject(res.text);
+		}
+
+		var $ = cheerio.load(res.text);
+
+		var show_rows = $('tr.forum_header_border[name="hover"]').filter(function() {
+			episode_rows = $(this).children('.forum_thread_post');
+			if(episode_rows.length > 0) {
+				return true;
+			}
+			return false;
+		});
+
+		show_rows.each(function() {
+			var entry = $(this);
+			
+			var info = parseRow(entry);
+
+			if(info != null) {
+				episodes.push(info);
+			}
+		});
+
+		defer.resolve(episodes);
+	})
+
+	return defer.promise;
+}
+
+var parseRow = function(entry) {
+	var result = {};
+
+	var season = -1;
+	var episode = -1;
+	var dateBased = false;
+	var repack = false;
+
+	var show = entry.children('td').eq(0).children('a').eq(0).children('img').eq(0).attr('title').replace('Show Description about ', '');
+
+	var title = entry.children('td').eq(1).text().replace('x264', '').replace('x265', ''); // temp fix
+	var magnet = entry.children('td').eq(2).children('a').first().attr('href');
+	var matcher = title.match(/S?0*(\d+)?[xE]0*(\d+)/);
+	var quality = title.match(/(\d{3,4})p/) ? title.match(/(\d{3,4})p/)[0] : "480p";
+	var torrent = null;
+	if(matcher) {
+		season = parseInt(matcher[1], 10);
+		episode = parseInt(matcher[2], 10);
+		torrent = {};
+		torrent.url = magnet;
+		torrent.seeds = 0;
+		torrent.peers = 0;
+	}
+	else {
+		matcher = title.match(/(\d{4}) (\d{2} \d{2})/); // Date based TV Shows
+		quality = title.match(/(\d{3,4})p/) ? title.match(/(\d{3,4})p/)[0] : "480p";
+		if(matcher) {
+			season = matcher[1]; // Season : 2014
+			episode = matcher[2].replace(" ", "/"); //Episode : 04/06
+			torrent = {};
+			torrent.url = magnet;
+			torrent.seeds = 0;
+			torrent.peers = 0;
+			dateBased = true;
+		}
+	}
+
+	result.season = season;
+	result.episode = episode;
+	result.quality = quality;
+	result.torrent = torrent;
+	result.dateBased = dateBased;
+	result.show = show;
+	result.repack = title.toLowerCase().indexOf('repack') > -1;
+
+	return torrent == null ? null : result;
+}
+
+module.exports = new EZTV();

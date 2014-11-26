@@ -1,6 +1,6 @@
 {
   "name": "eztv_api_x",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Web Scraper to provide methods to access EZTV easier",
   "author": "SlashmanX",
   "main": "./eztv_api",
@@ -9,9 +9,10 @@
     "url": "http://github.com/SlashmanX/eztv_api.git"
   },
   "dependencies": {
-    "request": "latest",
-    "cheerio": "latest",
-    "moment": "latest"
+    "superagent": "latest",
+    "cheerio": "0.18.0",
+    "moment": "2.8.4",
+    "q": "1.1.2"
   },
   "contributors": [
     {
